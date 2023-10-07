@@ -1,17 +1,31 @@
 import { FaSearch, FaTrash } from "react-icons/fa";
-import { addStudentState, deleteStudent } from "../store/student-slice";
-import { useDispatch, useSelector } from "react-redux";
 import AddStudent from "./AddStudent";
 import { useState } from "react";
+import debounce from "lodash/debounce";
 
 const StudentList = ({ students }) => {
-  const isAddStudent = useSelector((state) => state.student.isAddStudent);
-  const dispatch = useDispatch();
+  const [isAddStudent, setIsAddStudent] = useState(false);
+
   const [searchInput, setSearchInput] = useState("");
   const [filteredStudents, setFilteredStudents] = useState(students);
 
+  const debouncedSearch = debounce((searchTerm) => {
+    const filtered = students.filter((student) => {
+      const fullName =
+        `${student.studentName} ${student.fatherName}`.toLowerCase();
+      return fullName.includes(searchTerm);
+    });
+    setFilteredStudents(filtered);
+  }, 300);
+
+  const handleSearchInputChange = (event) => {
+    const searchTerm = event.target.value.toLowerCase();
+    setSearchInput(searchTerm);
+    debouncedSearch(searchTerm);
+  };
+
   const addStudentHandler = () => {
-    dispatch(addStudentState());
+    setIsAddStudent((prevData) => !prevData);
   };
 
   const deleteHandler = (id) => {
@@ -20,20 +34,6 @@ const StudentList = ({ students }) => {
     );
 
     setFilteredStudents(remStudents);
-    dispatch(deleteStudent(id));
-  };
-
-  const handleSearchInputChange = (event) => {
-    const searchTerm = event.target.value.toLowerCase();
-    setSearchInput(searchTerm);
-
-    const filtered = students.filter((student) => {
-      const fullName =
-        `${student.studentName} ${student.fatherName}`.toLowerCase();
-      return fullName.includes(searchTerm);
-    });
-
-    setFilteredStudents(filtered);
   };
 
   const addNewStudentHandler = (data) => {
@@ -44,7 +44,10 @@ const StudentList = ({ students }) => {
   return (
     <>
       {isAddStudent === true && (
-        <AddStudent onAddStudent={(data) => addNewStudentHandler(data)} />
+        <AddStudent
+          onAddStudent={(data) => addNewStudentHandler(data)}
+          onChangeState={addStudentHandler}
+        />
       )}
 
       {isAddStudent == false && (

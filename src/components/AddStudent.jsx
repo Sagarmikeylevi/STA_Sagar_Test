@@ -1,10 +1,6 @@
 import { useRef, useState } from "react";
-import { useDispatch } from "react-redux";
-import { addStudent, addStudentState } from "../store/student-slice";
 
-const AddStudent = ({ onAddStudent }) => {
-  const dispatch = useDispatch();
-
+const AddStudent = ({ onAddStudent, onChangeState }) => {
   const [formData, setFormData] = useState({
     studentName: "",
     dateOfBirth: "",
@@ -30,7 +26,6 @@ const AddStudent = ({ onAddStudent }) => {
   const submitHandler = (e) => {
     e.preventDefault();
 
-    // Validation for Date of Birth
     const today = new Date();
     const dob = new Date(formData.dateOfBirth);
     const ageDiff = today.getFullYear() - dob.getFullYear();
@@ -55,11 +50,9 @@ const AddStudent = ({ onAddStudent }) => {
     };
 
     onAddStudent(formDataWithId);
+    onChangeState();
 
-    dispatch(addStudent(formDataWithId));
-    dispatch(addStudentState());
-
-    console.log(formDataWithId);
+    // console.log(formDataWithId);
   };
   return (
     <div className="w-full max-w-lg mx-auto bg-white shadow-lg rounded-md p-8">
